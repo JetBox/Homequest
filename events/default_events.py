@@ -1,4 +1,5 @@
 from event import Event
+import curses
 import sys
 
 
@@ -11,6 +12,9 @@ class Event_QuitGame(Event):
         pass
 
     def execute(self):
+        curses.nocbreak()
+        curses.echo()
+        curses.endwin()
         sys.exit()
 
 
