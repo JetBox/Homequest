@@ -9,7 +9,7 @@ class Event_Bedroom(Event):
 
         # set intro of the flavor text
         if self.player.previous_location != self.__class__.__name__:
-            flavor_text += "You walk up the stairs into your living room.\n\n"
+            flavor_text += "You walk up the stairs into your bedroom.\n\n"
 
         # generate text describing what is in your living room, if applicable
         flavor_text += "Your bedroom is shabby. You have a cozy bed in the corner, showing clear signs of having recently been slept in. At the opposite side of the room, your desk can be found supporting your computer.\n\n"
