@@ -150,9 +150,16 @@ class EventManager:
     def print_flavor_text(self, flavor_text):
         self.print_header()
 
-        c_count = 0
-        last_space_index = 0
+        self.format_text(flavor_text)
+
         for ct in flavor_text:
+            self.text.append(ct)
+
+        self.print_footer()
+
+    def format_text(self, text):
+        c_count = 0
+        for ct in text:
             t = ct.get_text()
             last_space_index = 0
             for i, char in enumerate(t):
@@ -167,12 +174,6 @@ class EventManager:
                 if c_count > self.line_length:
                     ct.text = ct.text[:last_space_index] + '\n' + ct.text[last_space_index+1:]
                     c_count = 0
-
-        for ct in flavor_text:
-            self.text.append(ct)
-
-        self.print_footer()
-
 
 def main(screen):
     game = EventManager(screen)
