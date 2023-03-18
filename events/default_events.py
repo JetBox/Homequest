@@ -1,4 +1,6 @@
+from colorful_text import Colorful_Text
 from event import Event
+import curses
 import sys
 
 
@@ -11,6 +13,9 @@ class Event_QuitGame(Event):
         pass
 
     def execute(self):
+        curses.nocbreak()
+        curses.echo()
+        curses.endwin()
         sys.exit()
 
 
@@ -21,10 +26,11 @@ class Event_CheckStats(Event):
 
     def generate_flavor_text(self):
         p = self.player
-        flavor_text = "Name: {}\n".format(p.name)
-        flavor_text += "Money: {}\n".format(p.money)
-        flavor_text += "Creativity: {}\n".format(p.creativity)
-        flavor_text += "Writing Skills: {}\n".format(p.writing)
+        flavor_text = []
+        flavor_text.append(Colorful_Text("Name: {}\n".format(p.name)))
+        flavor_text.append(Colorful_Text("Money: {}\n".format(p.money)))
+        flavor_text.append(Colorful_Text("Creativity: {}\n".format(p.creativity)))
+        flavor_text.append(Colorful_Text("Writing Skills: {}\n".format(p.writing)))
 
         return flavor_text
 

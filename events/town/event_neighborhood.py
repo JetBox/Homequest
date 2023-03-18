@@ -1,3 +1,4 @@
+from colorful_text import Colorful_Text
 from event import Event
 
 
@@ -5,22 +6,22 @@ class Event_Neighborhood(Event):
     description = "Your Neighborhood"
 
     def generate_flavor_text(self):
-        flavor_text = ""
+        flavor_text = []
 
         # set intro of the flavor text
         if self.player.previous_location == "Event_LivingRoom":
-            flavor_text += "You get a breath of fresh air as you walk outside to your neighborhood.\n\n"
+            flavor_text.append(Colorful_Text("You get a breath of fresh air as you walk outside to your neighborhood.\n\n"))
         elif self.player.previous_location != self.__class__.__name__:
-            flavor_text += "You walk outside .\n\n"
+            flavor_text.append(Colorful_Text("You walk outside .\n\n"))
 
         # generate text describing what is in your living room, if applicable
-        flavor_text += "Describe the neighborhood here\n\n"
+        flavor_text.append(Colorful_Text("Describe the neighborhood here\n\n"))
 
         # generate text depending on where the player can go
-        flavor_text += "You can go home from here. You can also go other places! Wow!\n\n"
+        flavor_text.append(Colorful_Text("You can go home from here. You can also go other places! Wow!\n\n"))
 
         # generate text depending on what you can do
-        flavor_text += "You can't do jack diddly squat here!\n\n"
+        flavor_text.append(Colorful_Text("You can't do jack diddly squat here!\n\n"))
 
         return flavor_text
 
