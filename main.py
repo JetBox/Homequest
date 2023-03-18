@@ -1,9 +1,9 @@
 import curses
 import math
-import random
 import sys
 import textwrap
 
+from colors import *
 from colorful_text import Colorful_Text
 from events.house import *
 from events.town import *
@@ -48,32 +48,24 @@ def get_am_or_pm(min):
 
 
 def clear_screen():
+    ColorManager.update_special_colors()
     stdscr.clear()
 
 
 class EventManager:
 
     def __init__(self, stdscr):
-        self.color = -1
         self.text = None
         self.event = None
         self.player = None
         self.current_event = None
         self.screen = stdscr
+        self.line_length = 80
 
     def print_text(self, text=None):
-
-        if text:
-            self.screen.addstr(text)
-        else:
-            if type(self.text) == Colorful_Text:
-                self.text.print_text(self.screen)
-            else:
-                self.screen.addstr(self.text)
-            """
-            for char in self.text:
-                self.screen.addstr(char)
-            """
+        write_text = text if text else self.text
+        for ct in write_text:
+            ct.print_text(self.screen)
 
     def generate_name(self):
         pname = ""
@@ -93,6 +85,8 @@ class EventManager:
         self.current_event = "Event_LivingRoom"
 
     def run(self):
+        ColorManager.create_special_colors()
+        ColorManager.init_color_pairs()
         self.setup_game()
         self.play_game()
 
@@ -103,7 +97,7 @@ class EventManager:
     def play_game(self):
         while True:
             clear_screen()
-            self.text = ""
+            self.text = []
             self.event = self.get_next_event()
             flavor_text, event_map = self.event.execute()
 
@@ -123,11 +117,11 @@ class EventManager:
         actions = []
         for i, ev in enumerate(event_map.keys()):
             actions.append((ev, event_map[ev][1]))
-            self.text += "({}) {}".format(i + 1, event_map[ev][0])
+            self.text.append(Colorful_Text("({}) {}".format(i + 1, event_map[ev][0])))
             if event_map[ev][1] == 0:
-                self.text += "\n"
+                self.text.append(Colorful_Text("\n"))
             else:
-                self.text += " ({})\n".format(format_minutes_to_time(event_map[ev][1]))
+                self.text.append(Colorful_Text(" ({})\n".format(format_minutes_to_time(event_map[ev][1]))))
 
         return actions
 
@@ -142,26 +136,40 @@ class EventManager:
         return int(choice - 48)
 
     def print_header(self):
-        self.text += "\n"
-        self.text += "{}{} - Day {}\n".format(format_minutes_to_time(self.player.time, is_clock=True),
-                                              get_am_or_pm(self.player.time),
-                                              self.player.day)
-        self.text += "${}\n".format(self.player.money)
-        self.text += "Current Location: {}\n".format(str_to_class(self.player.current_location).description)
-        self.text += "--------------------------------------------------------------------------------\n"
+        self.text.append(Colorful_Text("\n"))
+        self.text.append(Colorful_Text("{}{} - Day {}\n".format(format_minutes_to_time(self.player.time, is_clock=True),
+                                                            get_am_or_pm(self.player.time),
+                                                            self.player.day)))
+        self.text.append(Colorful_Text("${}\n".format(self.player.money)))
+        self.text.append(Colorful_Text("Current Location: {}\n".format(str_to_class(self.player.current_location).description)))
+        self.text.append(Colorful_Text("--------------------------------------------------------------------------------\n"))
 
     def print_footer(self):
-        self.text += "--------------------------------------------------------------------------------\n\n"
+        self.text.append(Colorful_Text("--------------------------------------------------------------------------------\n\n"))
 
     def print_flavor_text(self, flavor_text):
         self.print_header()
 
-        # self.print_text(flavor_text)
-        paragraphs = flavor_text.splitlines()
-        for paragraph in paragraphs:
-            p = textwrap.fill(paragraph, 80)
-            self.text += p
-            self.text += "\n"
+        c_count = 0
+        last_space_index = 0
+        for ct in flavor_text:
+            t = ct.get_text()
+            last_space_index = 0
+            for i, char in enumerate(t):
+                if char == '\n':
+                    c_count = 0
+                    last_space_index = i
+                    continue
+                if char.isspace():
+                    last_space_index = i
+                c_count += 1
+
+                if c_count > self.line_length:
+                    ct.text = ct.text[:last_space_index] + '\n' + ct.text[last_space_index+1:]
+                    c_count = 0
+
+        for ct in flavor_text:
+            self.text.append(ct)
 
         self.print_footer()
 
@@ -175,8 +183,9 @@ def main(screen):
 if __name__ == "__main__":
     stdscr = curses.initscr()  # curses screen
     curses.start_color()
-    # stdscr.timeout(100)
-    stdscr.scrollok(1)  # enable scrolling
+    curses.init_pair(1, curses.COLOR_RED, curses.COLOR_WHITE)
+    stdscr.timeout(100)
+    stdscr.scrollok(True)  # enable scrolling
     curses.curs_set(False)  # disable curses
     curses.noecho()  # disable echo typing
     curses.cbreak()  # remove need to press enter
